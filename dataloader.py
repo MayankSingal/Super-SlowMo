@@ -26,7 +26,7 @@ def populateTrainList(folderPath):
 			    trainList.append(imageList[i:i+12])
 
 	
-	return random.shuffle(trainList)
+	return trainList
 
 
 
@@ -37,37 +37,23 @@ def randomCropOnList(image_list, output_size):
 	h,w = output_size
 	height, width, _ = image_list[0].shape
 
-	ratio_x = random.uniform(0, 1)
-	ratio_y = random.uniform(0, 1)
-	x_offset = int((ratio_x - 0.5) * 2 * center_perturb_max)
-	y_offset = int((ratio_y - 0.5) * 2 * center_perturb_max)
-	center_x = center[0][0] + x_offset
-	center_y = center[0][1] + y_offset
+	#print(h,w,height,width)
 
-	offset_left, offset_up = int(round(center_x - output_size[0] / 2)), int(round(center_y - output_size[1] / 2))	
+	i = random.randint(0, height - h)
+	j = random.randint(0, width - w)
 
-	st_x = 0
-	ed_x = w
 	st_y = 0
-	ed_y = h
-	or_st_x = offset_left
-	or_ed_x = offset_left + w
-	or_st_y = offset_up
-	or_ed_y = offset_up + h
+	ed_y = w
+	st_x = 0
+	ed_x = h
 
-	if offset_left < 0:
-	    st_x = -offset_left
-	    or_st_x = 0
-	if offset_left + w > width:
-	    ed_x = width - offset_left
-	    or_ed_x = width
-	if offset_up < 0:
-	    st_y = -offset_up
-	    or_st_y = 0
-	if offset_up + h > height:
-	    ed_y = height - offset_up
-	    or_ed_y = height
+	or_st_y = i 
+	or_ed_y = i + w
+	or_st_x = j
+	or_ed_x = j + h    
 
+	#print(st_x, ed_x, st_y, ed_y)
+	#print(or_st_x, or_ed_x, or_st_y, or_ed_y)
 
 
 	for img in image_list:
@@ -88,6 +74,7 @@ class expansionLoader(data.Dataset):
 	def __init__(self, folderPath):
 
 		self.trainList = populateTrainList(folderPath)
+		print("# of training samples:", len(self.trainList))
 
 
 	def __getitem__(self, index):
@@ -97,11 +84,11 @@ class expansionLoader(data.Dataset):
 		h,w,c = cv2.imread(img_path_list[0]).shape
 
 		if h > w:
-			scaleX = 480*(h/w)
+			scaleX = int(480*(h/w))
 			scaleY = 480
 		elif h <= w:
 			scaleX = 480
-			scaleY = 480*(w/h)	
+			scaleY = int(480*(w/h))
 
 
 
@@ -117,10 +104,11 @@ class expansionLoader(data.Dataset):
 				tmp = cv2.resize(cv2.imread(img_path), (scaleX, scaleY))
 				img_list.append(np.array(tmp,dtype=np.float32))
 
-		cropped_img_list = randomCropOnList(img_list)
+		cropped_img_list = randomCropOnList(img_list,(352,352))
 		for i in range(len(cropped_img_list)):
 			cropped_img_list[i] = torch.from_numpy(cropped_img_list[i].transpose((2, 0, 1)))
 
+		
 		return cropped_img_list  
 
 
