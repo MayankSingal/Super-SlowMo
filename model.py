@@ -159,7 +159,7 @@ class UNet_refine(nn.Module):
 		super(UNet_refine, self).__init__()
 
 		## Encoder 
-		self.conv1 = nn.Conv2d(6,32,7,1,3,bias=False)
+		self.conv1 = nn.Conv2d(20,32,7,1,3,bias=False)
 		self.conv2 = nn.Conv2d(32,32,7,1,3,bias=False)
 		self.relu = nn.ReLU(inplace=True)
 		self.avgpool1 = nn.AvgPool2d(kernel_size=7,stride=2, padding=3)
@@ -206,18 +206,18 @@ class UNet_refine(nn.Module):
 		self.conv21 = nn.Conv2d(64,32,3,1,1,bias=False)
 		self.conv22 = nn.Conv2d(32,32,3,1,1,bias=False)
 
-		self.conv23 = nn.Conv2d(32,4,3,1,1,bias=False)
+		self.conv23 = nn.Conv2d(32,6,3,1,1,bias=False)
 		
 		self.tanh = nn.Tanh()
 
 
 
 
-	def forward(self, I0, I1):
+	def forward(self, I0, I1, F_0_1, F_1_0, F_t_0, F_t_1, g_I0_F_t_0, g_I1_F_t_1):
 		sources = []
 
 
-		X = torch.cat([I0, I1], 1)
+		X = torch.cat([I0, I1, F_0_1, F_1_0, F_t_0, F_t_1, g_I0_F_t_0, g_I1_F_t_1], 1)
 
 		## Encoder
 		X = self.conv1(X)
