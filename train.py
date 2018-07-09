@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torchvision
 import torch.backends.cudnn as cudnn
 import torch.optim
 import os
@@ -33,6 +34,7 @@ def train_val():
 			
 			I0_var = torch.autograd.Variable(imageList[0]).cuda()
 			I1_var = torch.autograd.Variable(imageList[-1]).cuda()
+			
 
 			flow_out_var = flowModel(I0_var, I1_var)
 
@@ -84,9 +86,12 @@ def train_val():
 			optimizer.zero_grad()
 			loss.backward()
 			optimizer.step()
-			print(loss.data[0])
-			#if (i+1 % 10) == 0:
-			#	print("Loss at iteration", i, ":", loss.data[0])
+			#print(loss.data[0])
+			if ((i+1) % 10) == 0:
+				print("Loss at iteration", i, ":", loss.data[0])
+				torchvision.utils.save_image(I0_var,'1.jpg',normalize=True)
+				torchvision.utils.save_image(interpolated_image_t,'2.jpg', normalize=True)
+				torchvision.utils.save_image(I1_var,'3.jpg',normalize=True)
 
 
 

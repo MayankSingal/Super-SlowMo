@@ -103,7 +103,8 @@ class expansionLoader(data.Dataset):
 			for img_path in img_path_list[start:start+9]:
 				tmp = cv2.resize(cv2.imread(img_path), (scaleX, scaleY))
 				img_list.append(np.array(tmp,dtype=np.float32))
-
+		for i in range(len(img_list)):
+			img_list[i] = (img_list[i]/127.5) - 1
 		cropped_img_list = randomCropOnList(img_list,(352,352))
 		for i in range(len(cropped_img_list)):
 			cropped_img_list[i] = torch.from_numpy(cropped_img_list[i].transpose((2, 0, 1)))
