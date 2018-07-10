@@ -61,51 +61,39 @@ def train_val():
 			
 
 			flow_out_var = flowModel(I0_var, I1_var)
-			#flow_out_var /= 352
-
-			#F_0_1_x = flow_out_var[:,0,:,:]
-			#F_0_1_y = flow_out_var[:,1,:,:]
-			#F_1_0_x = flow_out_var[:,2,:,:]
-			#F_1_0_y = flow_out_var[:,3,:,:]
+			
 			F_0_1 = flow_out_var[:,:2,:,:]
 			F_1_0 = flow_out_var[:,2:,:,:]
 
 			loss_vector = []
 
+			image_collector = []
 			for t_ in range(1,8):
 
 				t = t_/8
 				It_var = torch.autograd.Variable(imageList[t_]).cuda()
 
 				F_t_0 = -(1-t)*t*F_0_1 + t*t*F_1_0
-				#F_t_0_y = -(1-t)*t*F_0_1_y + t*t*F_1_0_y
-				F_t_1 = (1-t)*(1-t)*F_0_1 - t*(1-t)*(F_1_0)
-				#F_t_1_y = (1-t)*(1-t)*F_0_1_y - t*(1-t)*(F_1_0_y)
-
-				#F_t_0 = torch.cat([torch.unsqueeze(F_t_0_x,3), torch.unsqueeze(F_t_0_y,3)], 3)
-				#F_t_1 = torch.cat([torch.unsqueeze(F_t_1_x,3), torch.unsqueeze(F_t_1_y,3)], 3)
 				
-				g_I0_F_t_0 = warper(I0_var, F_t_0)#nn.functional.grid_sample(I0_var, F_t_0, mode='bilinear')
-				g_I1_F_t_1 = warper(I1_var, F_t_1)#nn.functional.grid_sample(I1_var, F_t_1, mode='bilinear')
-
-				# Computing again to match shape with refine network input
-				#F_t_0 = torch.cat([torch.unsqueeze(F_t_0_x,1), torch.unsqueeze(F_t_0_y,1)], 1)
-				#F_t_1 = torch.cat([torch.unsqueeze(F_t_1_x,1), torch.unsqueeze(F_t_1_y,1)], 1)
+				F_t_1 = (1-t)*(1-t)*F_0_1 - t*(1-t)*(F_1_0)
+				
+				
+				g_I0_F_t_0 = warper(I0_var, F_t_0)
+				g_I1_F_t_1 = warper(I1_var, F_t_1)
 
 				interp_out_var = interpolationModel(I0_var, I1_var, F_0_1, F_1_0, F_t_0, F_t_1, g_I0_F_t_0, g_I1_F_t_1)
 				F_t_0_final = interp_out_var[:,:2,:,:]
 				F_t_1_final = interp_out_var[:,2:4,:,:]
 				V_t_0 = torch.unsqueeze(interp_out_var[:,4,:,:],1)
-				V_t_1 = 1 - V_t_0#torch.unsqueeze(interp_out_var[:,5,:,:],1)
+				V_t_1 = 1 - V_t_0
 
-				#print(V_t_0.size())
-
-				g_I0_F_t_0_final = warper(I0_var, F_t_0_final)#nn.functional.grid_sample(I0_var, F_t_0_final.permute(0,2,3,1), mode='bilinear')
-				g_I0_F_t_1_final = warper(I1_var, F_t_1_final)#nn.functional.grid_sample(I1_var, F_t_1_final.permute(0,2,3,1), mode='bilinear')
+				g_I0_F_t_0_final = warper(I0_var, F_t_0_final)
+				g_I0_F_t_1_final = warper(I1_var, F_t_1_final)
 
 				normalization = (1-t)*V_t_0 + t*V_t_1
 				interpolated_image_t_pre = (1-t)*V_t_0*g_I0_F_t_0_final + t*V_t_1*g_I0_F_t_1_final
 				interpolated_image_t = interpolated_image_t_pre / normalization
+				image_collector.append(interpolated_image_t)
 
 				loss_t = criterion(interpolated_image_t, It_var)
 				loss_vector.append(loss_t)				
@@ -114,12 +102,15 @@ def train_val():
 			optimizer.zero_grad()
 			loss.backward()
 			optimizer.step()
-			#print(loss.data[0])
+
 			if ((i+1) % 10) == 0:
-				print("Loss at iteration", i, ":", loss.data[0])
-				torchvision.utils.save_image(I0_var,'1.jpg',normalize=True)
-				torchvision.utils.save_image(interpolated_image_t,'2.jpg', normalize=True)
-				torchvision.utils.save_image(I1_var,'3.jpg',normalize=True)
+				print("Loss at iteration", i+1, ":", loss.data[0])
+			
+			if ((i+1) % 10) == 0:
+				torchvision.utils.save_image((I0_var+1)/2,'samples/'+ str(i+1) +'1.jpg')
+				for jj,image in enumerate(image_collector):
+					torchvision.utils.save_image((image+1)/2,'samples/'+ str(i+1) + str(jj+1)+'.jpg')
+				torchvision.utils.save_image(I1_var,'samples/'+str(i+1)+'9.jpg')
 
 
 
