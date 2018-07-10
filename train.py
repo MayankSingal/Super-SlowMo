@@ -110,7 +110,7 @@ def train_val():
 				torchvision.utils.save_image((I0_var+1)/2,'samples/'+ str(i+1) +'1.jpg')
 				for jj,image in enumerate(image_collector):
 					torchvision.utils.save_image((image+1)/2,'samples/'+ str(i+1) + str(jj+1)+'.jpg')
-				torchvision.utils.save_image(I1_var,'samples/'+str(i+1)+'9.jpg')
+				torchvision.utils.save_image((I1_var+1)/2,'samples/'+str(i+1)+'9.jpg')
 
 
 
