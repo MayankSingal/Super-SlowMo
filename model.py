@@ -58,7 +58,7 @@ class UNet_flow(nn.Module):
 
 		self.conv23 = nn.Conv2d(32,4,3,1,1,bias=False)
 		
-		self.tanh = nn.Tanh()
+		#self.tanh = nn.Tanh()
 
 
 
@@ -148,7 +148,7 @@ class UNet_flow(nn.Module):
 
 		X = self.conv23(X)
 		#print(X.size())
-		out = self.tanh(X)
+		out = X#self.tanh(X)
 
 		return out
 
@@ -206,9 +206,10 @@ class UNet_refine(nn.Module):
 		self.conv21 = nn.Conv2d(64,32,3,1,1,bias=False)
 		self.conv22 = nn.Conv2d(32,32,3,1,1,bias=False)
 
-		self.conv23 = nn.Conv2d(32,6,3,1,1,bias=False)
+		self.conv23 = nn.Conv2d(32,5,3,1,1,bias=False)
 		
-		self.tanh = nn.Tanh()
+		#self.tanh = nn.Tanh()
+		self.sigmoid = nn.Sigmoid()
 
 
 
@@ -298,9 +299,10 @@ class UNet_refine(nn.Module):
 
 		X = self.conv23(X)
 		#print(X.size())
-		out = self.tanh(X)
+		out = X#self.tanh(X)
+		out_processed = torch.cat((X[:,:4,:,:],self.sigmoid(torch.unsqueeze(out[:,4,:,:],1))),1)
 
-		return out
+		return out_processed
 
 
 
