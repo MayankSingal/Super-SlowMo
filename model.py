@@ -11,7 +11,7 @@ class UNet_flow(nn.Module):
 		## Encoder 
 		self.conv1 = nn.Conv2d(6,32,7,1,3,bias=False)
 		self.conv2 = nn.Conv2d(32,32,7,1,3,bias=False)
-		self.relu = nn.ReLU(inplace=True)
+		self.relu = nn.LeakyReLU(0.1,True)#nn.ReLU(inplace=True)
 		self.avgpool1 = nn.AvgPool2d(kernel_size=7,stride=2, padding=3)
 
 		self.conv3 = nn.Conv2d(32,64,5,1,2,bias=False)
@@ -71,6 +71,7 @@ class UNet_flow(nn.Module):
 
 		## Encoder
 		X = self.conv1(X)
+		X = self.relu(X)
 		X = self.conv2(X)
 		X = self.relu(X)
 		##print(X.size())
@@ -78,6 +79,7 @@ class UNet_flow(nn.Module):
 
 		X = self.avgpool1(X)
 		X = self.conv3(X)
+		X = self.relu(X)
 		X = self.conv4(X)
 		X = self.relu(X)
 		##print(X.size())
@@ -85,6 +87,7 @@ class UNet_flow(nn.Module):
 
 		X = self.avgpool2(X)
 		X = self.conv5(X)
+		X = self.relu(X)
 		X = self.conv6(X)
 		X = self.relu(X)
 		##print(X.size())
@@ -92,6 +95,7 @@ class UNet_flow(nn.Module):
 
 		X = self.avgpool3(X)
 		X = self.conv7(X)
+		X = self.relu(X)
 		X = self.conv8(X)
 		X = self.relu(X)
 		##print(X.size())
@@ -99,6 +103,7 @@ class UNet_flow(nn.Module):
 
 		X = self.avgpool4(X)
 		X = self.conv9(X)
+		X = self.relu(X)
 		X = self.conv10(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -106,6 +111,7 @@ class UNet_flow(nn.Module):
 
 		X = self.avgpool5(X)
 		X = self.conv11(X)
+		X = self.relu(X)
 		X = self.conv12(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -113,6 +119,7 @@ class UNet_flow(nn.Module):
 		## Decoder
 		X = self.upsample2D(X)
 		X = self.conv13(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-1]
 		X = self.conv14(X)
@@ -120,6 +127,7 @@ class UNet_flow(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv15(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-2]
 		X = self.conv16(X)
@@ -127,6 +135,7 @@ class UNet_flow(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv17(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-3]
 		X = self.conv18(X)
@@ -134,6 +143,7 @@ class UNet_flow(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv19(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-4]
 		X = self.conv20(X)
@@ -141,12 +151,14 @@ class UNet_flow(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv21(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-5]
 		X = self.conv22(X)
 		X = self.relu(X)
 
 		X = self.conv23(X)
+		X = self.relu(X)
 		#print(X.size())
 		out = X#self.tanh(X)
 
@@ -161,7 +173,7 @@ class UNet_refine(nn.Module):
 		## Encoder 
 		self.conv1 = nn.Conv2d(20,32,7,1,3,bias=False)
 		self.conv2 = nn.Conv2d(32,32,7,1,3,bias=False)
-		self.relu = nn.ReLU(inplace=True)
+		self.relu = nn.LeakyReLU(0.1,True)#nn.ReLU(inplace=True)
 		self.avgpool1 = nn.AvgPool2d(kernel_size=7,stride=2, padding=3)
 
 		self.conv3 = nn.Conv2d(32,64,5,1,2,bias=False)
@@ -222,6 +234,7 @@ class UNet_refine(nn.Module):
 
 		## Encoder
 		X = self.conv1(X)
+		X = self.relu(X)
 		X = self.conv2(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -229,6 +242,7 @@ class UNet_refine(nn.Module):
 
 		X = self.avgpool1(X)
 		X = self.conv3(X)
+		X = self.relu(X)
 		X = self.conv4(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -236,6 +250,7 @@ class UNet_refine(nn.Module):
 
 		X = self.avgpool2(X)
 		X = self.conv5(X)
+		X = self.relu(X)
 		X = self.conv6(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -243,6 +258,7 @@ class UNet_refine(nn.Module):
 
 		X = self.avgpool3(X)
 		X = self.conv7(X)
+		X = self.relu(X)
 		X = self.conv8(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -250,6 +266,7 @@ class UNet_refine(nn.Module):
 
 		X = self.avgpool4(X)
 		X = self.conv9(X)
+		X = self.relu(X)
 		X = self.conv10(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -257,6 +274,7 @@ class UNet_refine(nn.Module):
 
 		X = self.avgpool5(X)
 		X = self.conv11(X)
+		X = self.relu(X)
 		X = self.conv12(X)
 		X = self.relu(X)
 		#print(X.size())
@@ -264,6 +282,7 @@ class UNet_refine(nn.Module):
 		## Decoder
 		X = self.upsample2D(X)
 		X = self.conv13(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-1]
 		X = self.conv14(X)
@@ -271,6 +290,7 @@ class UNet_refine(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv15(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-2]
 		X = self.conv16(X)
@@ -278,6 +298,7 @@ class UNet_refine(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv17(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-3]
 		X = self.conv18(X)
@@ -285,6 +306,7 @@ class UNet_refine(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv19(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-4]
 		X = self.conv20(X)
@@ -292,15 +314,17 @@ class UNet_refine(nn.Module):
 
 		X = self.upsample2D(X)
 		X = self.conv21(X)
+		X = self.relu(X)
 		#print(X.size())
 		X = X + sources[-5]
 		X = self.conv22(X)
 		X = self.relu(X)
 
 		X = self.conv23(X)
+		#X = self.relu(X)
 		#print(X.size())
 		out = X#self.tanh(X)
-		out_processed = torch.cat((X[:,:4,:,:],self.sigmoid(torch.unsqueeze(out[:,4,:,:],1))),1)
+		out_processed = torch.cat((self.relu(X[:,:4,:,:]),self.sigmoid(torch.unsqueeze(out[:,4,:,:],1))),1)
 
 		return out_processed
 
