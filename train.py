@@ -41,9 +41,12 @@ def train_val():
 	interpolationModel = model.UNet_refine().cuda()
 
 	### ResNet for Perceptual Loss
-	res50_model = torchvision.models.resnet50(pretrained=True)
+	res50_model = torchvision.models.resnet18(pretrained=True)
 	res50_conv = nn.Sequential(*list(res50_model.children())[:-2])
 	res50_conv.cuda()
+
+	for param in res50_conv.parameters():
+		param.requires_grad = False
 
 
 	#dataFeeder = dataloader.expansionLoader('/home/user/data/nfs')
@@ -110,8 +113,8 @@ def train_val():
 				loss_vector.append(loss_reconstruction_t)		
 
 				### Perceptual Loss Collector ###
-				feat_pred = resnet50(interpolated_image_t)
-				feat_gt = resnet50(It_var)
+				feat_pred = res50_conv(interpolated_image_t)
+				feat_gt = res50_conv(It_var)
 				loss_perceptual_t = criterionMSE(feat_pred, feat_gt)
 				perceptual_loss_collector.append(loss_perceptual_t)
 
@@ -132,8 +135,14 @@ def train_val():
 			g_I1_F_0_1 = warper(I1_var, F_0_1)
 			loss_warping = (criterion(g_I0_F_1_0, I1_var) + criterion(g_I1_F_0_1, I0_var)) + sum(warping_loss_collector)/len(warping_loss_collector) 
 
+			### Smoothness Loss Computation ###
+			loss_smooth_1_0 = torch.mean(torch.abs(F_1_0[:, :, :, :-1] - F_1_0[:, :, :, 1:])) + torch.mean(torch.abs(F_1_0[:, :, :-1, :] - F_1_0[:, :, 1:, :]))
+			loss_smooth_0_1 = torch.mean(torch.abs(F_0_1[:, :, :, :-1] - F_0_1[:, :, :, 1:])) + torch.mean(torch.abs(F_0_1[:, :, :-1, :] - F_0_1[:, :, 1:, :]))
+			loss_smooth = loss_smooth_1_0 + loss_smooth_0_1
+
+
 			### Overall Loss
-			loss = 0.8*loss_reconstruction + 0.005*loss_perceptual + 0.4*loss_warping
+			loss = 0.8*loss_reconstruction + 0.005*loss_perceptual + 0.4*loss_warping + loss_smooth
 
 			### Optimization
 			optimizer.zero_grad()
@@ -141,7 +150,7 @@ def train_val():
 			optimizer.step()
 
 			if ((i+1) % 10) == 0:
-				print("Loss at iteration", i+1, ":", loss.data[0])
+				print("Loss at iteration", i+1, "/", len(train_loader), ":", loss.item())
 			
 			if ((i+1) % 100) == 0:
 				torchvision.utils.save_image((I0_var+1)/2,'samples/'+ str(i+1) +'1.jpg')
