@@ -97,6 +97,10 @@ class expansionLoader(data.Dataset):
 		start = random.randint(0,3)
 		h,w,c = cv2.imread(img_path_list[0]).shape
 
+		image = cv2.cv2.imread(img_path_list[0])
+		
+		#print(h,w,c)
+
 		if h > w:
 			scaleX = int(360*(h/w))
 			scaleY = 360
@@ -111,14 +115,27 @@ class expansionLoader(data.Dataset):
 		flip = random.randint(0,1)
 		if flip:
 			for img_path in img_path_list[start:start+9]:
-				tmp = cv2.resize(cv2.imread(img_path), (scaleX,scaleY))
-				img_list.append(np.array(cv2.flip(tmp,0), dtype=np.float32))
+				tmp = cv2.resize(cv2.imread(img_path), (scaleX,scaleY))[:,:,(2,1,0)]
+				img_list.append(np.array(cv2.flip(tmp,1), dtype=np.float32))
 		else:
 			for img_path in img_path_list[start:start+9]:
-				tmp = cv2.resize(cv2.imread(img_path), (scaleX, scaleY))
+				tmp = cv2.resize(cv2.imread(img_path), (scaleX, scaleY))[:,:,(2,1,0)]
 				img_list.append(np.array(tmp,dtype=np.float32))
-		#for i in range(len(img_list)): ?? Normalization not required according to paper.
-		#	img_list[i] = (img_list[i]/127.5) - 1
+		#cv2.imshow("j",tmp)
+		#cv2.waitKey(0) & 0xff
+		#brak
+		for i in range(len(img_list)):
+			#print(img_list[i].shape)
+			#brak
+			img_list[i] /= 255
+			img_list[i][:,:,0] -= 0.485#(img_list[i]/127.5) - 1
+			img_list[i][:,:,1] -= 0.456
+			img_list[i][:,:,2] -= 0.406
+
+			img_list[i][:,:,0] /= 0.229
+			img_list[i][:,:,1] /= 0.224
+			img_list[i][:,:,2] /= 0.225
+
 		cropped_img_list = randomCropOnList(img_list,(352,352))
 		for i in range(len(cropped_img_list)):
 			cropped_img_list[i] = torch.from_numpy(cropped_img_list[i].transpose((2, 0, 1)))

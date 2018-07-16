@@ -69,7 +69,9 @@ def train_val():
 			
 			I0_var = torch.autograd.Variable(imageList[0]).cuda()
 			I1_var = torch.autograd.Variable(imageList[-1]).cuda()
-			
+			#torchvision.utils.save_image((I0_var),'samples/'+ str(i+1) +'1.jpg',normalize=True)
+			#brak	
+
 
 			flow_out_var = flowModel(I0_var, I1_var)
 			
@@ -153,10 +155,10 @@ def train_val():
 				print("Loss at iteration", i+1, "/", len(train_loader), ":", loss.item())
 			
 			if ((i+1) % 100) == 0:
-				torchvision.utils.save_image((I0_var+1)/2,'samples/'+ str(i+1) +'1.jpg')
+				torchvision.utils.save_image((I0_var),'samples/'+ str(i+1) +'1.jpg',normalize=True)
 				for jj,image in enumerate(image_collector):
-					torchvision.utils.save_image((image+1)/2,'samples/'+ str(i+1) + str(jj+1)+'.jpg')
-				torchvision.utils.save_image((I1_var+1)/2,'samples/'+str(i+1)+'9.jpg')
+					torchvision.utils.save_image((image),'samples/'+ str(i+1) + str(jj+1)+'.jpg',normalize=True)
+				torchvision.utils.save_image((I1_var),'samples/'+str(i+1)+'9.jpg',normalize=True)
 
 
 
