@@ -1,4 +1,4 @@
-# VideoExpansion
+# Super-SloMo
 
 This repository contains an Unofficial PyTorch implimentation of "Super SloMo: High Quality Estimation of Multiple Intermediate Frames for Video Interpolation", Jiang et. al. CVPR 2018
 
